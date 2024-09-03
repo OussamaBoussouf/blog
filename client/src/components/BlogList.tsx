@@ -13,7 +13,7 @@ function BlogList() {
   return (
     <Wrapper>
       <BlogListConainer>
-        {[...Array(6)].map((index) => (
+        {[...Array(6).keys()].map((index) => (
           <Blog key={index} />
         ))}
       </BlogListConainer>
