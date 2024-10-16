@@ -1,12 +1,9 @@
 import styled from "styled-components";
 import { Wrapper } from "../styles/GlobalStyle.style";
 import { useForm, SubmitHandler } from "react-hook-form";
-import axios from "axios";
-
-type FormInputs = {
-  username: string;
-  password: string;
-};
+import axiosApi from "../api/axios";
+import { useUser } from "../context/userContext";
+import { Navigate } from "react-router-dom";
 
 const StyledRegister = styled.div`
   margin-block: 2rem;
@@ -45,10 +42,18 @@ const SubmitButton = styled.button`
 const ErrorMessage = styled.p`
   color: red;
   font-size: 0.8rem;
-  margin-block: .5rem;
+  margin-block: 0.5rem;
 `;
 
+
+type FormInputs = {
+  username: string;
+  password: string;
+};
+
+
 function Register() {
+  const { userInfo } = useUser();
   const {
     register,
     handleSubmit,
@@ -57,8 +62,8 @@ function Register() {
   } = useForm<FormInputs>();
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
-    axios
-      .post("http://localhost:8000/api/register", data)
+    axiosApi
+      .post("/register", data)
       .then((response) => {
         console.log(response);
       })
@@ -69,6 +74,11 @@ function Register() {
         });
       });
   };
+
+  if (userInfo) {
+    return <Navigate to="/" />;
+  }
+
   return (
     <StyledRegister>
       <Wrapper>

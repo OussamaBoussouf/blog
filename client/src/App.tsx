@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import CreateBlog from "./pages/CreateBlog";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { UserContextProvider } from "./context/userContext";
+import EditBlog from "./pages/EditBlog";
 
 function App() {
   return (
@@ -14,7 +15,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route element={<Home />} index />
-          <Route element={<SingleBlog />} path="/1" />
+          <Route element={<SingleBlog />} path="/blog/:id" />
+          <Route element={<EditBlog />} path="/edit/:id" />
           <Route element={<Login />} path="/login" />
           <Route element={<Register />} path="/register" />
           <Route
