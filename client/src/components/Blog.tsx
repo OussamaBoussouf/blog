@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 const BlogContainer = styled.div`
@@ -5,7 +6,7 @@ const BlogContainer = styled.div`
   flex-direction: column;
 
   @media screen and (min-width: 768px) {
-    gap: 1rem;
+    gap: 2rem;
     flex-direction: row;
   }
 `;
@@ -13,15 +14,19 @@ const BlogContainer = styled.div`
 const Description = styled.div`
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   gap: 1rem;
   padding-block: 1rem;
   @media screen and (min-width: 768px) {
     padding-block: 0;
+    width: 60%;
   }
 `;
 
 const Image = styled.img`
   object-fit: cover;
+  max-height: 250px;
+  overflow: hidden;
   @media screen and (min-width: 768px) {
     width: 40%;
   }
@@ -43,23 +48,36 @@ const Author = styled.p`
   justify-content: space-between;
 `;
 
-function Blog() {
+type BlogProps = {
+  akey: string;
+  title: string;
+  image: string;
+  author: string;
+  summary: string;
+  createdAt: Date;
+};
+
+function Blog({ akey, title, author, summary, image, createdAt }: BlogProps) {
+  const date = new Date(createdAt);
+  const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+    dateStyle: "long",
+  });
+  const formatDate = dateTimeFormatter.format(date);
+
   return (
     <BlogContainer>
-      <Image src="./images/blog-image.jpg" alt="blog image" />
+      <Image
+        src={"http://localhost:8000/static/images/" + image}
+        alt="blog image"
+      />
       <Description>
-        <Heading>
-          How Chat GPT and Other AI Tools Can Transform Our World
-        </Heading>
+        <Link to={`/blog/${akey}`}>
+          <Heading>{title.length > 90 ? title.substring(0, 90) + '...' : title}</Heading>
+        </Link>
         <Author>
-          <b>Published by dawid</b> <span>2023-01-07 11:03:14</span>
+          <b> Published by: {author}</b> <span>{formatDate}</span>
         </Author>
-        <Text>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Et quasi
-          repellat sed non iure, nam earum velit atque praesentium, maiores
-          exercitationem necessitatibus! Esse laboriosam odio ullam quasi nisi
-          deleniti amet!
-        </Text>
+        <Text>{summary.length > 250 ? summary.substring(0, 250) + '...' : summary}</Text>
       </Description>
     </BlogContainer>
   );

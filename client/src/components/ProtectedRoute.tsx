@@ -4,7 +4,6 @@ import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { userInfo } = useUser();
-  console.log(userInfo);
   if (!userInfo) {
     return <Navigate to="/login" replace={true} />;
   }

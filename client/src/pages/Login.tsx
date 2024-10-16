@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Wrapper } from "../styles/GlobalStyle.style";
-import axios from "axios";
 import { useUser } from "../context/userContext";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import axiosApi from "../api/axios";
 
 type FormInputs = {
   username: string;
@@ -51,7 +51,7 @@ const ErrorMessage = styled.p`
 `;
 
 function Login() {
-  const { setUserInfo } = useUser();
+  const {userInfo, setUserInfo } = useUser();
   const navigate = useNavigate();
 
   const {
@@ -61,12 +61,12 @@ function Login() {
     formState: { errors },
   } = useForm<FormInputs>();
 
-  const onSubmit: SubmitHandler<FormInputs> = (data: FormInputs) => {
-    axios
-      .post("http://localhost:8000/api/login", data, { withCredentials: true })
+  const onSubmit: SubmitHandler<FormInputs> = (data) => {
+    axiosApi
+      .post("/login", data)
       .then((response) => {
         setUserInfo(response.data);
-        navigate('/');
+        navigate("/");
       })
       .catch((error) => {
         setError("root.serverError", {
@@ -75,6 +75,10 @@ function Login() {
         });
       });
   };
+
+  if(userInfo){
+    return <Navigate to="/"/>
+  }
 
   return (
     <StyledLogin>

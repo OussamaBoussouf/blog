@@ -1,16 +1,32 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 const app = express();
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const User = require("./models/User");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 const cookieParser = require("cookie-parser");
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, __dirname + "/public/images");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now();
+    cb(null, uniqueSuffix + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 
 const salt = 10;
 
 const PORT = process.env.PORT || 3000;
 const PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
+
+//MODELS
+const User = require("./models/User");
+const Blog = require("./models/Blog");
 
 //
 mongoose
@@ -24,8 +40,114 @@ mongoose
 app.use(cookieParser());
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
+app.use("/static", express.static(path.join(__dirname, "public")));
 
 //routes
+app.post("/api/blog/create", upload.single("image"), (req, res) => {
+  try {
+    const image = req.file.filename;
+    const { title, summary, content, user_id } = req.body;
+    setTimeout(async () => {
+      const blogPost = {
+        title,
+        summary,
+        content,
+        user_id,
+        image,
+      };
+      const result = await Blog.create(blogPost);
+      res.status(200).json(result);
+    }, 1000);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get("/api/:id/edit", async (req, res) => {
+  try {
+    const blogId = req.params["id"];
+    const result = await Blog.findById(blogId, "title summary content");
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get("/api/:id/blog", async (req, res) => {
+  try {
+    const blogId = req.params["id"];
+
+    const result = await Blog.findById(blogId).populate("user_id");
+
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(404).json({ error: err.message });
+  }
+});
+
+app.put("/api/:id/update", upload.single("image"), async (req, res) => {
+  try {
+    const image = req.file?.filename;
+    const blogId = req.params["id"];
+    const { title, summary, content } = req.body;
+    const isBlogExist = await Blog.findById(blogId);
+
+    if (!isBlogExist) {
+      return res.status(404).json("Blog not found");
+    }
+
+    if (image) {
+      const imagePath = path.join(
+        __dirname,
+        "./public/images/",
+        isBlogExist.image
+      );
+
+      isBlogExist.set({
+        title,
+        summary,
+        content,
+        image,
+      });
+
+      
+      const updatedBlog = await isBlogExist.save();
+
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.log("Error occured while deleting the file: ", err);
+        } else {
+          console.log("File deleted successfully");
+        }
+      });
+
+      setTimeout(() => res.status(200).json(updatedBlog), 1000);
+    } else {
+      isBlogExist.set({
+        title,
+        summary,
+        content,
+      });
+
+      const updatedBlog = await isBlogExist.save();
+      setTimeout(() => res.status(200).json(updatedBlog), 1000);
+    }
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get("/api/blogs", async (req, res) => {
+  try {
+    const blogs = await Blog.find().populate("user_id").exec();
+    setTimeout(() => res.status(200).json(blogs), 1000);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//LOGIN AND REGISTER ROUTE
 app.post("/api/register", async (req, res) => {
   const { username, password } = req.body;
   try {

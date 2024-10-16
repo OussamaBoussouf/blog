@@ -1,13 +1,15 @@
 import styled from "styled-components";
 import { ContentWrapper } from "../styles/GlobalStyle.style";
-import { useRef, useState } from "react";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { Editor } from "@tinymce/tinymce-react";
 import axiosApi from "../api/axios";
 import { useUser } from "../context/userContext";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FormErrorMessage from "../components/FormErrorMessage";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const Form = styled.form`
   display: flex;
@@ -51,28 +53,41 @@ type FormInputs = {
   content: string;
 };
 
-function CreateBlog() {
+type Blog = {
+  title: string;
+  summary: string;
+  content: string;
+};
+
+function EditBlog() {
   const [isPending, setIsPending] = useState(false);
+  const [blog, setBlog] = useState<Blog | undefined>(undefined);
   const { userInfo } = useUser();
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const { id } = useParams();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     control,
-    reset,
+    setValue,
+    unregister,
     formState: { errors },
-  } = useForm<FormInputs>({
-    defaultValues: {
-      title: "",
-      summary: "",
-      image: "",
-      content: "",
-    },
-  });
+  } = useForm<FormInputs>();
 
-  const successNotification = () =>
-    toast.success("Blog has been added successfully.");
+  //NOTIFICATON MESSAGE
   const errorNotification = () => toast.error("Something went wrong.");
+
+  useEffect(() => {
+    unregister("image");
+    axiosApi
+      .get(`/${id}/edit`)
+      .then(({ data }) => {
+        setBlog(data);
+        setValue("title", data?.title);
+        setValue("summary", data?.summary);
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     setIsPending(true);
@@ -84,46 +99,31 @@ function CreateBlog() {
     formData.append("image", data.image[0]);
 
     axiosApi
-      .post("/blog/create", formData)
+      .put(`/${id}/update`, formData)
       .then(() => {
-        successNotification();
-        reset(
-          {
-            title: "",
-            summary: "",
-            image: "",
-            content: "",
-          },
-          {
-            keepErrors: false,
-          }
-        );
-        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+        navigate(`/blog/${id}?updated=true`);
       })
       .catch(() => errorNotification())
       .finally(() => setIsPending(false));
   };
+
   return (
     <ContentWrapper>
-      <Form
-        ref={formRef}
-        onSubmit={handleSubmit(onSubmit)}
-        encType="multipart/form-data"
-      >
+      <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
         <InputContainer>
           <Label htmlFor="title">Blog Title</Label>
           <Input
             {...register("title", {
               required: "this field is required",
-              maxLength: {
-                value: 50,
-                message: "the title should have at max 50 characters",
+              minLength: {
+                value: 30,
+                message: "the title should have at least 30 characters",
               },
             })}
             name="title"
             type="text"
             id="title"
-            placeholder="title here..."
+            placeholder="put title here..."
           />
           {/* HANDLING ERRORS */}
           <FormErrorMessage
@@ -138,15 +138,15 @@ function CreateBlog() {
           <Input
             {...register("summary", {
               required: "this field is required",
-              maxLength: {
-                value: 60,
-                message: "the summary should have at max 60 characters",
+              minLength: {
+                value: 50,
+                message: "the summary should have at least 50 characters",
               },
             })}
             name="summary"
             type="text"
             id="summary"
-            placeholder="blog summary..."
+            placeholder="your blog summary..."
           />
           {/* HANDLING ERRORS */}
           <FormErrorMessage
@@ -158,17 +158,13 @@ function CreateBlog() {
         </InputContainer>
         <InputContainer>
           <Label htmlFor="cover">Blog Cover</Label>
-          <Input
-            {...register("image", { required: "this field is required" })}
-            name="image"
-            type="file"
-          />
+          <Input {...register("image")} name="image" type="file" />
           {/* HANDLING ERRORS */}
           <FormErrorMessage
             inputName="image"
             validationType={["required"]}
             errors={errors}
-          />
+          />{" "}
           {/* HANDLING ERRORS */}
         </InputContainer>
         <InputContainer>
@@ -182,10 +178,10 @@ function CreateBlog() {
                 message: "content should be at least 1000 characters",
               },
             }}
-            render={({ field: { onChange, value } }) => (
+            render={({ field: { onChange } }) => (
               <Editor
                 apiKey={import.meta.env.VITE_API_KEY_TINYMCE}
-                initialValue={value}
+                initialValue={blog?.content}
                 onEditorChange={onChange}
                 init={{
                   plugins: ["link", "lists"],
@@ -206,12 +202,12 @@ function CreateBlog() {
           {/* HANDLING ERRORS */}
         </InputContainer>
         <SubmitButton disabled={isPending} type="submit">
-          {isPending ? "Submitting..." : "Submit"}
+          {isPending ? "Updatting..." : "Update"}
         </SubmitButton>
       </Form>
-      <ToastContainer position="top-right" />
+      {createPortal(<ToastContainer position="top-right" />, document.body)}
     </ContentWrapper>
   );
 }
 
-export default CreateBlog;
+export default EditBlog;
