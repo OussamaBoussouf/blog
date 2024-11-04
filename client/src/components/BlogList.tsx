@@ -3,8 +3,7 @@ import { Wrapper } from "../styles/GlobalStyle.style";
 import Blog from "./Blog";
 import BlogListLoading from "../components/BlogListLoading";
 import noBlogFound from "../assets/images/no-blog.png";
-import axiosApi from "../api/axios";
-import useSWR from "swr";
+
 
 const BlogListConainer = styled.main`
   display: flex;
@@ -31,11 +30,13 @@ type TypeBlog = {
   user_id: any;
 };
 
-function BlogList() {
-  const fetcher = (url: string) => axiosApi.get(url).then(({ data }) => data);
-  const { data: blogs, error, isLoading } = useSWR("/blogs", fetcher);
- 
-
+function BlogList({
+  blogs,
+  isLoading,
+}: {
+  blogs: TypeBlog[];
+  isLoading: boolean;
+}) {
   if (isLoading) {
     return (
       <Wrapper>
@@ -48,11 +49,11 @@ function BlogList() {
     );
   }
 
-  if (blogs.length === 0) {
+  if (blogs?.length === 0) {
     return (
       <Container>
         <img src={noBlogFound} width="267" alt="bee fly over a box" />
-        <h2>Sorry no blog is here</h2>
+        <h2>Sorry no blog has been published yeat.</h2>
       </Container>
     );
   }
@@ -60,7 +61,7 @@ function BlogList() {
   return (
     <Wrapper>
       <BlogListConainer>
-        {blogs.map((blog: TypeBlog) => (
+        {blogs?.map((blog: TypeBlog) => (
           <Blog
             key={blog._id}
             akey={blog._id}

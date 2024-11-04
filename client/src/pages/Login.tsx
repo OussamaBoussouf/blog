@@ -66,6 +66,8 @@ function Login() {
       .post("/login", data)
       .then((response) => {
         setUserInfo(response.data);
+        console.log(response.data);
+        localStorage.setItem('user_id', response.data.id);
         navigate("/");
       })
       .catch((error) => {

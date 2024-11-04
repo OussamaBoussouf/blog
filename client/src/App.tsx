@@ -8,6 +8,7 @@ import CreateBlog from "./pages/CreateBlog";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { UserContextProvider } from "./context/userContext";
 import EditBlog from "./pages/EditBlog";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
   return (
@@ -16,17 +17,13 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route element={<Home />} index />
           <Route element={<SingleBlog />} path="/blog/:id" />
-          <Route element={<EditBlog />} path="/edit/:id" />
           <Route element={<Login />} path="/login" />
           <Route element={<Register />} path="/register" />
-          <Route
-            element={
-              <ProtectedRoute>
-                <CreateBlog />
-              </ProtectedRoute>
-            }
-            path="/create-blog"
-          />
+          <Route element={<Unauthorized />} path="/unauthorized" />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<CreateBlog />} path="/create-blog" />
+            <Route element={<EditBlog />} path="/edit/:id" />
+          </Route>
         </Route>
       </Routes>
     </UserContextProvider>

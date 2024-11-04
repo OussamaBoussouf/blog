@@ -47,6 +47,7 @@ function Header() {
       .post("/logout")
       .then(() => {
         setUserInfo(null);
+        localStorage.removeItem('user_id');
         navigate("/");
       })
       .catch((error) => console.log(error));
