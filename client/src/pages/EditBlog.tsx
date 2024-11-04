@@ -7,7 +7,7 @@ import { useUser } from "../context/userContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FormErrorMessage from "../components/FormErrorMessage";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -57,6 +57,7 @@ type Blog = {
   title: string;
   summary: string;
   content: string;
+  user_id: string;
 };
 
 function EditBlog() {
@@ -77,6 +78,7 @@ function EditBlog() {
   //NOTIFICATON MESSAGE
   const errorNotification = () => toast.error("Something went wrong.");
 
+  //READ CURRENT BLOG
   useEffect(() => {
     unregister("image");
     axiosApi
@@ -89,6 +91,7 @@ function EditBlog() {
       .catch((error) => console.log(error));
   }, []);
 
+  //SUBMIT THE UPDATED VERSION OF BLOG
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     setIsPending(true);
     const formData = new FormData();
@@ -107,104 +110,112 @@ function EditBlog() {
       .finally(() => setIsPending(false));
   };
 
+  if (blog && blog.user_id != localStorage.getItem("user_id")) {
+    return <Navigate to="/unauthorized" replace={true} />;
+  }
+
   return (
     <ContentWrapper>
-      <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
-        <InputContainer>
-          <Label htmlFor="title">Blog Title</Label>
-          <Input
-            {...register("title", {
-              required: "this field is required",
-              minLength: {
-                value: 30,
-                message: "the title should have at least 30 characters",
-              },
-            })}
-            name="title"
-            type="text"
-            id="title"
-            placeholder="put title here..."
-          />
-          {/* HANDLING ERRORS */}
-          <FormErrorMessage
-            inputName="title"
-            validationType={["required", "maxLength"]}
-            errors={errors}
-          />
-          {/* HANDLING ERRORS */}
-        </InputContainer>
-        <InputContainer>
-          <Label htmlFor="summary">Blog Summary</Label>
-          <Input
-            {...register("summary", {
-              required: "this field is required",
-              minLength: {
-                value: 50,
-                message: "the summary should have at least 50 characters",
-              },
-            })}
-            name="summary"
-            type="text"
-            id="summary"
-            placeholder="your blog summary..."
-          />
-          {/* HANDLING ERRORS */}
-          <FormErrorMessage
-            inputName="summary"
-            validationType={["required", "maxLength"]}
-            errors={errors}
-          />
-          {/* HANDLING ERRORS */}
-        </InputContainer>
-        <InputContainer>
-          <Label htmlFor="cover">Blog Cover</Label>
-          <Input {...register("image")} name="image" type="file" />
-          {/* HANDLING ERRORS */}
-          <FormErrorMessage
-            inputName="image"
-            validationType={["required"]}
-            errors={errors}
-          />{" "}
-          {/* HANDLING ERRORS */}
-        </InputContainer>
-        <InputContainer>
-          <Controller
-            name="content"
-            control={control}
-            rules={{
-              required: "this field is required",
-              minLength: {
-                value: 1000,
-                message: "content should be at least 1000 characters",
-              },
-            }}
-            render={({ field: { onChange } }) => (
-              <Editor
-                apiKey={import.meta.env.VITE_API_KEY_TINYMCE}
-                initialValue={blog?.content}
-                onEditorChange={onChange}
-                init={{
-                  plugins: ["link", "lists"],
-                  toolbar:
-                    "undo redo | blocks | bold italic underline strikethrough | checklist numlist bullist indent outdent | link  ",
-                  menubar: false,
-                  statusbar: false,
-                }}
-              />
-            )}
-          />
-          {/* HANDLING ERRORS */}
-          <FormErrorMessage
-            inputName="content"
-            validationType={["required", "minLength"]}
-            errors={errors}
-          />
-          {/* HANDLING ERRORS */}
-        </InputContainer>
-        <SubmitButton disabled={isPending} type="submit">
-          {isPending ? "Updatting..." : "Update"}
-        </SubmitButton>
-      </Form>
+      {blog ? (
+        <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+          <InputContainer>
+            <Label htmlFor="title">Blog Title qsdqsd</Label>
+            <Input
+              {...register("title", {
+                required: "this field is required",
+                maxLength: {
+                  value: 50,
+                  message: "the title should have at max 50 characters",
+                },
+              })}
+              name="title"
+              type="text"
+              id="title"
+              placeholder="put title here..."
+            />
+            {/* HANDLING ERRORS */}
+            <FormErrorMessage
+              inputName="title"
+              validationType={["required", "maxLength"]}
+              errors={errors}
+            />
+            {/* HANDLING ERRORS */}
+          </InputContainer>
+          <InputContainer>
+            <Label htmlFor="summary">Blog Summary</Label>
+            <Input
+              {...register("summary", {
+                required: "this field is required",
+                maxLength: {
+                  value: 60,
+                  message: "the summary should have at max 60 characters",
+                },
+              })}
+              name="summary"
+              type="text"
+              id="summary"
+              placeholder="your blog summary..."
+            />
+            {/* HANDLING ERRORS */}
+            <FormErrorMessage
+              inputName="summary"
+              validationType={["required", "maxLength"]}
+              errors={errors}
+            />
+            {/* HANDLING ERRORS */}
+          </InputContainer>
+          <InputContainer>
+            <Label htmlFor="cover">Blog Cover</Label>
+            <Input {...register("image")} name="image" type="file" />
+            {/* HANDLING ERRORS */}
+            <FormErrorMessage
+              inputName="image"
+              validationType={["required"]}
+              errors={errors}
+            />{" "}
+            {/* HANDLING ERRORS */}
+          </InputContainer>
+          <InputContainer>
+            <Controller
+              name="content"
+              control={control}
+              rules={{
+                required: "this field is required",
+                minLength: {
+                  value: 1000,
+                  message: "content should be at least 1000 characters",
+                },
+              }}
+              render={({ field: { onChange } }) => (
+                <Editor
+                  apiKey={import.meta.env.VITE_API_KEY_TINYMCE}
+                  initialValue={blog?.content}
+                  onEditorChange={onChange}
+                  init={{
+                    plugins: ["link", "lists"],
+                    toolbar:
+                      "undo redo | blocks | bold italic underline strikethrough | checklist numlist bullist indent outdent | link  ",
+                    menubar: false,
+                    statusbar: false,
+                  }}
+                />
+              )}
+            />
+            {/* HANDLING ERRORS */}
+            <FormErrorMessage
+              inputName="content"
+              validationType={["required", "minLength"]}
+              errors={errors}
+            />
+            {/* HANDLING ERRORS */}
+          </InputContainer>
+          <SubmitButton disabled={isPending} type="submit">
+            {isPending ? "Updatting..." : "Update"}
+          </SubmitButton>
+        </Form>
+      ) : (
+        ""
+      )}
       {createPortal(<ToastContainer position="top-right" />, document.body)}
     </ContentWrapper>
   );

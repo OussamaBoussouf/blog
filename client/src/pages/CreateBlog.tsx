@@ -47,7 +47,7 @@ const SubmitButton = styled.button`
 type FormInputs = {
   title: string;
   summary: string;
-  image: FileList;
+  image: string;
   content: string;
 };
 
@@ -70,9 +70,11 @@ function CreateBlog() {
     },
   });
 
+  //NOTIFICATION
   const successNotification = () =>
     toast.success("Blog has been added successfully.");
   const errorNotification = () => toast.error("Something went wrong.");
+
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     setIsPending(true);
@@ -82,7 +84,6 @@ function CreateBlog() {
     formData.append("content", data.content);
     formData.append("user_id", userInfo!.id);
     formData.append("image", data.image[0]);
-
     axiosApi
       .post("/blog/create", formData)
       .then(() => {
@@ -99,7 +100,8 @@ function CreateBlog() {
           }
         );
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-      })
+      }
+    )
       .catch(() => errorNotification())
       .finally(() => setIsPending(false));
   };
@@ -185,7 +187,7 @@ function CreateBlog() {
             render={({ field: { onChange, value } }) => (
               <Editor
                 apiKey={import.meta.env.VITE_API_KEY_TINYMCE}
-                initialValue={value}
+                value={value}
                 onEditorChange={onChange}
                 init={{
                   plugins: ["link", "lists"],

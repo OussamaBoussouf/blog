@@ -55,6 +55,7 @@ const Image = styled.img`
   object-fit: cover;
   max-height: 400px;
   width: 100%;
+  border-radius: 10px;
 `;
 
 const Author = styled.p`
@@ -85,7 +86,7 @@ function SingleBlog() {
   const [searchParams] = useSearchParams();
 
   const fetcher = (url: string) => axiosApi.get(url).then(({ data }) => data);
-  const { data: blog, error, isLoading } = useSWR<Blog>(`/${id}/blog`, fetcher);
+  const { data: blog } = useSWR<Blog>(`/${id}/blog`, fetcher);
   const successNotification = () =>
     toast.success("Blog has been updated successfully.");
 

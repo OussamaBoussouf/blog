@@ -25,7 +25,8 @@ const Description = styled.div`
 
 const Image = styled.img`
   object-fit: cover;
-  max-height: 250px;
+  height: 240px;
+  border-radius: 10px;
   overflow: hidden;
   @media screen and (min-width: 768px) {
     width: 40%;
@@ -63,6 +64,7 @@ function Blog({ akey, title, author, summary, image, createdAt }: BlogProps) {
     dateStyle: "long",
   });
   const formatDate = dateTimeFormatter.format(date);
+
 
   return (
     <BlogContainer>
