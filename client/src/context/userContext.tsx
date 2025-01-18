@@ -1,10 +1,10 @@
-import axios from "axios";
 import React, {
   createContext,
   useContext,
   useLayoutEffect,
   useState,
 } from "react";
+import axiosApi from "../api/axios";
 
 type UserInfo = {
   username: string;
@@ -34,10 +34,15 @@ export function UserContextProvider({
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useLayoutEffect(() => {
-    axios
-      .get("http://localhost:8000/api/refresh", { withCredentials: true })
-      .then(({ data }) => setUserInfo(data))
-      .catch((error) => console.log(error));
+    const accessToken = localStorage.getItem("accessToken");
+    const refreshTokenExist = document.cookie.includes("refreshToken");
+    
+    if (accessToken && refreshTokenExist) {
+      axiosApi
+        .post("http://localhost:8000/api/auth/refresh-token")
+        .then(({ data }) => setUserInfo(data))
+        .catch((error) => console.log(error));
+    }
   }, []);
 
   return (

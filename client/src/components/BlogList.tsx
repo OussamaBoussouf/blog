@@ -37,6 +37,7 @@ function BlogList({
   blogs: TypeBlog[];
   isLoading: boolean;
 }) {
+  
   if (isLoading) {
     return (
       <Wrapper>

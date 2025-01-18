@@ -7,6 +7,7 @@ import { useUser } from "../context/userContext";
 import { toast, ToastContainer } from "react-toastify";
 import { createPortal } from "react-dom";
 import useSWR from "swr";
+import SingleBlogLoadingSkeleton from "../components/SingleBlogLoadingSkeleton";
 
 const SingleBlogContainer = styled.div`
   margin-block: 2rem;
@@ -60,15 +61,25 @@ const Image = styled.img`
 
 const Author = styled.p`
   font-size: clamp(0.8rem, 2vw, 1rem);
-
-  span {
-    margin-left: 1em;
+  span:first-child {
+    margin-right: 1em;
   }
 `;
 
-const BlogContent = styled.div`
+const BlogContent = styled.article`
   p {
-    line-height: 1.8rem;
+    line-height: 1.5rem;
+
+    margin-block: 1rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-block: 0.8rem;
   }
 `;
 
@@ -85,8 +96,12 @@ function SingleBlog() {
   const { userInfo } = useUser();
   const [searchParams] = useSearchParams();
 
-  const fetcher = (url: string) => axiosApi.get(url).then(({ data }) => data);
+  const fetcher = async (url: string) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return axiosApi.get(url).then(({ data }) => data);
+  };
   const { data: blog } = useSWR<Blog>(`/${id}/blog`, fetcher);
+
   const successNotification = () =>
     toast.success("Blog has been updated successfully.");
 
@@ -96,53 +111,61 @@ function SingleBlog() {
     }
   }, []);
 
+  if (blog === undefined) {
+    return (
+      <ContentWrapper>
+       <SingleBlogLoadingSkeleton/>
+      </ContentWrapper>
+    );
+  }
+
   return (
     <ContentWrapper>
-      {blog != undefined ? (
-        <SingleBlogContainer>
-          <Heading>{blog?.title}</Heading>
-          <AuthorContainer>
-            <Author>
-              <b>Published by {blog?.user_id?.username}</b>
-              <span>
-                {new Date(blog.created_at).toLocaleDateString("en-US", {
-                  dateStyle: "long",
-                })}
-              </span>
-            </Author>
-            {userInfo && userInfo.id === blog.user_id._id && (
-              <Link to={`/edit/${id}`}>
-                <Button type="button">
-                  <svg
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                    />
-                  </svg>
-                  Edit this blog
-                </Button>
-              </Link>
-            )}
-          </AuthorContainer>
-          <Image
-            src={`http://localhost:8000/static/images/${blog?.image}`}
-            alt="blog image"
-          />
-          <BlogContent>
-            <div dangerouslySetInnerHTML={{ __html: blog?.content }}></div>
-          </BlogContent>
-        </SingleBlogContainer>
-      ) : null}
+      <SingleBlogContainer>
+        <Heading>{blog?.title}</Heading>
+        <AuthorContainer>
+          <Author>
+            <span>
+              Published by : <b>{blog?.user_id?.username}</b>
+            </span>
+            <span>
+              {new Date(blog.created_at).toLocaleDateString("en-US", {
+                dateStyle: "long",
+              })}
+            </span>
+          </Author>
+          {userInfo && userInfo.id === blog.user_id._id && (
+            <Link to={`/edit/${id}`}>
+              <Button type="button">
+                <svg
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+                  />
+                </svg>
+                Edit this blog
+              </Button>
+            </Link>
+          )}
+        </AuthorContainer>
+        <Image
+          src={`http://localhost:8000/static/images/${blog?.image}`}
+          alt="blog image"
+          width="736"
+          height="400"
+        />
+        <BlogContent dangerouslySetInnerHTML={{ __html: blog?.content }} />
+      </SingleBlogContainer>
       {createPortal(<ToastContainer position="top-right" />, document.body)}
     </ContentWrapper>
   );

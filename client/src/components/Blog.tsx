@@ -25,9 +25,14 @@ const Description = styled.div`
 
 const Image = styled.img`
   object-fit: cover;
-  height: 240px;
+  height: 250px;
   border-radius: 10px;
   overflow: hidden;
+  width: 100%;
+`;
+
+const ImageContainer = styled.div`
+  width: 100%;
   @media screen and (min-width: 768px) {
     width: 40%;
   }
@@ -65,21 +70,31 @@ function Blog({ akey, title, author, summary, image, createdAt }: BlogProps) {
   });
   const formatDate = dateTimeFormatter.format(date);
 
-
   return (
     <BlogContainer>
-      <Image
-        src={"http://localhost:8000/static/images/" + image}
-        alt="blog image"
-      />
+      <ImageContainer>
+        <Link to={`/blog/${akey}`}>
+          <Image
+            width="400"
+            height="250"
+            loading="lazy"
+            src={"http://localhost:8000/static/images/" + image}
+            alt="blog image"
+          />
+        </Link>
+      </ImageContainer>
       <Description>
         <Link to={`/blog/${akey}`}>
-          <Heading>{title.length > 90 ? title.substring(0, 90) + '...' : title}</Heading>
+          <Heading>
+            {title.length > 90 ? title.substring(0, 90) + "..." : title}
+          </Heading>
         </Link>
         <Author>
           <b> Published by: {author}</b> <span>{formatDate}</span>
         </Author>
-        <Text>{summary.length > 250 ? summary.substring(0, 250) + '...' : summary}</Text>
+        <Text>
+          {summary.length > 250 ? summary.substring(0, 250) + "..." : summary}
+        </Text>
       </Description>
     </BlogContainer>
   );

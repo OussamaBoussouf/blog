@@ -8,6 +8,7 @@ const StyledHeader = styled.header`
   height: 80px;
   display: flex;
   align-items: center;
+  margin-block: .8rem;
 `;
 
 const HeaderContainer = styled.div`
@@ -30,12 +31,26 @@ const StyledLogo = styled(Link)`
   }
 `;
 
+const CreateButton = styled.button`
+  color: black;
+  border: none;
+  background-color: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  @media screen and (min-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
 const LogoutButton = styled.button`
   color: black;
   border: none;
   background-color: transparent;
-  font-size: 1rem;
+  font-size: 0.8rem;
   cursor: pointer;
+  @media screen and (min-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 function Header() {
@@ -44,10 +59,11 @@ function Header() {
 
   const handleLogout = () => {
     axiosApi
-      .post("/logout")
+      .post("/auth/logout")
       .then(() => {
         setUserInfo(null);
-        localStorage.removeItem('user_id');
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("accessToken");
         navigate("/");
       })
       .catch((error) => console.log(error));
@@ -57,10 +73,12 @@ function Header() {
     <StyledHeader>
       <Wrapper>
         <HeaderContainer>
-          <StyledLogo to="/">MyBlog</StyledLogo>
+          <StyledLogo to="/">Blogger</StyledLogo>
           {userInfo ? (
             <Navigation>
-              <Link to="/create-blog">Create new blog</Link>
+              <CreateButton>
+                <Link to="/create-blog">Create new blog</Link>
+              </CreateButton>
               <LogoutButton type="button" onClick={handleLogout}>
                 Logout {`(${userInfo.username})`}
               </LogoutButton>
