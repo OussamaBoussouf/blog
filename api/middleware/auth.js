@@ -1,16 +1,20 @@
-const Blog = require("../models/Blog");
 const jwt = require("jsonwebtoken");
-const PRIVATE_KEY = process.env.JWT_PRIVATE_KEY;
+const ACCESS_TOKEN_KEY = process.env.ACCESSTOKEN_PRIVATE_KEY;
 
-exports.isAuthor = async (req, res, next) => {
-  const { accessToken } = req.cookies;
-  const user = jwt.verify(accessToken, PRIVATE_KEY);
-  const isBlogExist = await Blog.findById(req.params["id"]);
-  console.log(isBlogExist?.user_id.toString(), user.id);
+exports.authenticateToken = async (req, res, next) => {
+  let accessToken = req.header('Authorization');
 
-  if (isBlogExist?.user_id.toString() === user.id) {
-    next();
-  } else {
-    res.status(401).send("You are Unauthorized to perform this action");
+  if (!accessToken) {
+    return res.status(401).json({ error: 'Access Denied. No token provided.' });
   }
+
+  accessToken = accessToken.split(" ")[1];
+
+  jwt.verify(accessToken, ACCESS_TOKEN_KEY, (err, user) => {
+    if (err) {
+      return res.status(401).json({ error: 'Invalid Access Token', type: 'accessTokenError'});
+    }
+    req.user = user;
+    next();
+  });
 };

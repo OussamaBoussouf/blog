@@ -1,4 +1,4 @@
-import styled, { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle, keyframes } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
 
@@ -18,6 +18,12 @@ body{
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
+}
+
+#root{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 *, *::after, *::before{
@@ -59,6 +65,12 @@ input{
 
 `;
 
+const slideSkeletonBg = keyframes`
+  to {
+    background-position-x: -250%;
+  }
+`;
+
 export const Wrapper = styled.div`
   max-width: 1150px;
   width: 100%;
@@ -70,4 +82,18 @@ export const ContentWrapper = styled.div`
   width: 100%;
   padding-inline: 2rem;
   margin-inline: auto;
+`;
+
+export const SkeletonLoader = styled.div`
+  background-color: gainsboro;
+  background-image: linear-gradient(
+    -80deg,
+    transparent 40%,
+    white 50%,
+    transparent 60%
+  );
+  background-size: 200%;
+  background-position-x: -50%;
+  border-radius: 5px;
+  animation: ${slideSkeletonBg} 2s linear forwards infinite;
 `;

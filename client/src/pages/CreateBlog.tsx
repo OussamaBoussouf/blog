@@ -118,8 +118,8 @@ function CreateBlog() {
             {...register("title", {
               required: "this field is required",
               maxLength: {
-                value: 50,
-                message: "the title should have at max 50 characters",
+                value: 100,
+                message: "the title should have at max 100 characters",
               },
             })}
             name="title"
@@ -141,8 +141,8 @@ function CreateBlog() {
             {...register("summary", {
               required: "this field is required",
               maxLength: {
-                value: 60,
-                message: "the summary should have at max 60 characters",
+                value: 300,
+                message: "the summary should have at max 300 characters",
               },
             })}
             name="summary"

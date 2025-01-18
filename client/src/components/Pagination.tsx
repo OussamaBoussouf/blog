@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
 const PaginationContainer = styled.div`
-  margin-bottom: 2rem;
+  margin-top: auto;
+  padding-bottom: 2rem;
 `;
 
 const PaginationWrapper = styled.div`
@@ -61,14 +62,11 @@ function Pagination({
   next: { page: number };
   previous: { page: number };
 }) {
+  
   const paginationNumbers = [];
 
   for (let i = 1; i <= totalPages; i++) {
     paginationNumbers.push(i);
-  }
-
-  if (!totalPages) {
-    return null;
   }
 
   return (

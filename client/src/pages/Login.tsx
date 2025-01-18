@@ -33,7 +33,16 @@ const Input = styled.input`
   padding: 0.5em 0.5em;
 `;
 
-const SubmitButton = styled.button`
+const Button = styled.button`
+  width: 100%;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  padding-block: 0.5em;
+  cursor: pointer;
+`;
+
+const SubmitButton = styled(Button)`
   width: 100%;
   color: white;
   background-color: black;
@@ -44,6 +53,18 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
+const DemoButton = styled(Button)`
+  border: 2px solid black;
+  background-color: transparent;
+  color: black;
+  margin-bottom: 1rem;
+
+  &:hover {
+    opacity: 0.9;
+    background-color: lightgray;
+  }
+`;
+
 const ErrorMessage = styled.p`
   color: red;
   font-size: 0.8rem;
@@ -51,23 +72,24 @@ const ErrorMessage = styled.p`
 `;
 
 function Login() {
-  const {userInfo, setUserInfo } = useUser();
+  const { userInfo, setUserInfo } = useUser();
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<FormInputs>();
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     axiosApi
-      .post("/login", data)
+      .post("/auth/login", data)
       .then((response) => {
+        localStorage.setItem("user_id", response.data.id);
+        localStorage.setItem("accessToken", response.headers["x-access-token"]);
         setUserInfo(response.data);
-        console.log(response.data);
-        localStorage.setItem('user_id', response.data.id);
         navigate("/");
       })
       .catch((error) => {
@@ -78,8 +100,12 @@ function Login() {
       });
   };
 
-  if(userInfo){
-    return <Navigate to="/"/>
+  const handleDemoAccountSubimission = () => {
+    onSubmit({ username: "Tom", password: "123456789" });
+  };
+
+  if (userInfo) {
+    return <Navigate to="/" />;
   }
 
   return (
@@ -121,6 +147,9 @@ function Login() {
           {errors.root?.serverError.type === 400 && (
             <ErrorMessage>{errors.root.serverError.message}</ErrorMessage>
           )}
+          <DemoButton type="button" onClick={handleDemoAccountSubimission}>
+            Try a Demo Account
+          </DemoButton>
           <SubmitButton type="submit">Login</SubmitButton>
         </Form>
       </Wrapper>

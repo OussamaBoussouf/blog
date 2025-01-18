@@ -1,19 +1,11 @@
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
+import { SkeletonLoader } from "../styles/GlobalStyle.style";
 
-const pulse = keyframes`
-    from{
-        opacity: 0.3;
-    }
-    to{
-        opacity: 1; 
-    }
-`;
 
 const BlogWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  animation: ${pulse} 1s linear infinite alternate;
   @media screen and (min-width: 768px) {
     flex-direction: row;
     align-items: center;
@@ -21,15 +13,14 @@ const BlogWrapper = styled.div`
   }
 `;
 
-const Image = styled.div`
+const Image = styled(SkeletonLoader)`
   height: 250px;
   width: 100%;
-  background-color: lightgray;
   @media screen and (min-width: 768px) {
     width: 40%;
   }
 `;
-const Description = styled.div`
+const Description = styled(SkeletonLoader)`
   height: 100px;
   width: 100%;
   background-color: lightgray;

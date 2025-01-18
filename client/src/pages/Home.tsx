@@ -7,14 +7,20 @@ import { useEffect } from "react";
 
 function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const fetcher = (url: string) => axiosApi.get(url).then(({ data }) => data);
+
+  const fetcher = async (url: string) => {
+    const { data } = await axiosApi.get(url);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return data;
+  };
+  
   const { data, isLoading } = useSWR(
     `/blogs?page=${searchParams.get("page") || 0}`,
     fetcher
   );
 
   const handlePageClick = (currentPage: string) => {
-    if (Number(currentPage) === 1) {
+    if (+currentPage === 1) {
       setSearchParams("");
     } else {
       setSearchParams({ page: currentPage });
@@ -28,13 +34,15 @@ function Home() {
   return (
     <>
       <BlogList blogs={data?.blogs} isLoading={isLoading} />
-      <Pagination
-        currentPage={parseInt(searchParams.get("page") ?? "1")}
-        totalPages={data?.totalPages}
-        onPageChange={handlePageClick}
-        next={data?.next}
-        previous={data?.previous}
-      />
+      {data?.totalPages > 1 && (
+        <Pagination
+          currentPage={parseInt(searchParams.get("page") ?? "1")}
+          totalPages={data?.totalPages}
+          onPageChange={handlePageClick}
+          next={data?.next}
+          previous={data?.previous}
+        />
+      )}
     </>
   );
 }

@@ -63,7 +63,7 @@ function Register() {
 
   const onSubmit: SubmitHandler<FormInputs> = (data) => {
     axiosApi
-      .post("/register", data)
+      .post("/auth/register", data)
       .then((response) => {
         console.log(response);
       })
